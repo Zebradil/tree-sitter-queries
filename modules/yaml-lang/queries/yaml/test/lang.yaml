@@ -1,0 +1,47 @@
+plain: # lang:go
+  func main() { fmt.Println("$product version $currentValue") }
+sequence:
+  - # lang:go
+    func main() { fmt.Println("$product version $currentValue") }
+singleQuote: # lang:go
+  'func main() { fmt.Println("$product version $currentValue") }'
+doubleQuote: # lang:yaml
+  "foo: bar # something"
+
+block: >- # lang:regex
+  name: ['"]?(?<product>[^'"\s]+)['"]?\s*
+  version: ['"]?(?<currentValue>[^'"\s]+)['"]?
+
+block2: |- # lang:regex
+  name: ['"]?(?<product>[^'"\s]+)['"]?\s*
+  version: ['"]?(?<currentValue>[^'"\s]+)['"]?
+
+list:
+  - # lang:bash
+    |
+    echo "$product version $currentValue"
+  - |- #! lang:bash
+    echo "$product version $currentValue"
+
+map:
+  foo: | # lang:yaml
+    hello: world
+    list:
+      - item1
+      - 43
+  bar: | # lang:python
+    def greet():
+        print("Hello, World!")
+
+umbrellaMap1: # lang:go
+  plain: func main() { fmt.Println("$product version $currentValue") }
+  singleQuote: 'func main() { fmt.Println("$product version $currentValue") }'
+  doubleQuote: "func main() { fmt.Println(`$product version $currentValue`) }"
+
+umbrellaMap2: # lang:yaml
+  block: |
+    key1: value1
+    key2: value2
+  block2: |-
+    keyA: valueA
+    keyB: valueB
