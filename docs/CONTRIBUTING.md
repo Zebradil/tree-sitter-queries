@@ -1,54 +1,3 @@
-# Tree Sitter Queries Library for Neovim
-
-A modular collection of Tree-sitter injection and highlight queries for Neovim, designed for selective installation.
-
-## Features
-
-- 🎯 **Selective loading** — install only the modules you need
-- 🔌 **Custom directives** — modules can include custom Tree-sitter directives and predicates
-- 📦 **Self-contained** — each module bundles its queries and directives together
-- ⚡ **Lazy-load ready** — integrates seamlessly with lazy.nvim
-
-## Requirements
-
-- Neovim >= 0.9.0
-- [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter)
-
-## Installation
-
-Using [lazy.nvim](https://github.com/folke/lazy.nvim):
-
-```lua
-{
-  "zebradil/tree-sitter-queries",
-  dependencies = { "nvim-treesitter/nvim-treesitter" },
-  opts = {
-    modules = {
-      "yaml-lang",
-      -- Add more modules as needed
-    },
-  },
-}
-```
-
-## Configuration
-
-### Options
-
-```lua
-require("ts-queries").setup({
-  modules = {}, -- List of module names to enable
-})
-```
-
-### Available Modules
-
-| Module      | Language | Description                                                                       |
-| ----------- | -------- | --------------------------------------------------------------------------------- |
-| `yaml-lang` | YAML     | Injects various languages in YAML files based on comments (e.g., `# lang:python`) |
-
-> Run `:lua print(vim.inspect(require("ts-queries").list_modules()))` to list all available modules.
-
 ## Adding New Modules
 
 ### 1. Create Module Directory
@@ -56,6 +5,7 @@ require("ts-queries").setup({
 ```
 modules/
 └── <module-name>/
+    ├── init.lua                  # Module metadata + custom directives
     ├── queries/
     │   └── <language>/
     │       ├── injections.scm
@@ -66,7 +16,28 @@ modules/
                 └── highlights.scm   # If extending existing highlights
 ```
 
-### 2. Query Files
+### 2. Create Module Config
+
+`modules/<module-name>/init.lua`:
+
+```lua
+local M = {}
+
+-- Required: list of filetypes that trigger this module
+M.filetypes = { "yaml" }
+
+-- Optional: list of required tree-sitter parsers
+M.parsers = { "yaml" }
+
+-- Optional: setup function for custom directives/predicates
+M.setup = function()
+  -- See "Adding Custom Directives" below
+end
+
+return M
+```
+
+### 3. Add Query Files
 
 For queries that extend existing ones, add `;extends` at the top:
 
@@ -79,7 +50,7 @@ For queries that extend existing ones, add `;extends` at the top:
   (#set! injection.language "your_language"))
 ```
 
-### 3. File Placement
+### 4. File Placement
 
 | Purpose                    | Location                              |
 | -------------------------- | ------------------------------------- |
@@ -89,14 +60,14 @@ For queries that extend existing ones, add `;extends` at the top:
 
 ## Adding Custom Directives
 
-If your module requires custom Tree-sitter directives or predicates, create a directive file:
+If your module requires custom Tree-sitter directives or predicates, add them to the module's `setup()` function:
 
-### 1. Create Directive File
-
-`lua/ts-queries/directives/<module-name>.lua`:
+`modules/<module-name>/init.lua`:
 
 ```lua
 local M = {}
+
+M.filetypes = { "yaml" }
 
 M.setup = function()
   -- Add a custom directive
@@ -122,7 +93,7 @@ end
 return M
 ```
 
-### 2. Use in Queries
+Use in queries:
 
 ```scheme
 ;extends
@@ -133,7 +104,7 @@ return M
   (#set! injection.language "target_language"))
 ```
 
-The directive file is automatically loaded when the module is enabled, before queries are added to the runtime path.
+The `setup()` function is automatically called when the module is loaded, before queries are added to the runtime path.
 
 ## Troubleshooting
 
@@ -145,13 +116,20 @@ The directive file is automatically loaded when the module is enabled, before qu
    :lua print(vim.inspect(require("ts-queries").list_modules()))
    ```
 
-2. Check runtime path includes the module:
+2. Check if the module is loaded:
 
    ```lua
-   :lua print(vim.o.rtp)
+   :lua print(require("ts-queries").is_loaded("your-module"))
    ```
 
-3. Inspect active queries:
+3. Manually load a module for debugging:
+
+   ```lua
+   :lua require("ts-queries").load("your-module")
+   ```
+
+4. Inspect active queries:
+
    ```vim
    :InspectTree
    ```
@@ -176,18 +154,27 @@ If queries conflict with other plugins, move them to `after/queries/`:
 modules/<module-name>/after/queries/<language>/injections.scm
 ```
 
+### Lazy loading not working
+
+Verify your module's `init.lua` exports the `filetypes` field:
+
+```lua
+-- modules/<module-name>/init.lua
+local M = {}
+M.filetypes = { "yaml" }  -- Required for lazy loading
+return M
+```
+
 ## Project Structure
 
 ```
-tree-sitter-queries/
+ts-queries-library/
 ├── lua/
 │   └── ts-queries/
-│       ├── init.lua              # Main setup logic
-│       └── directives/           # Custom directives per module
-│           ├── init.lua
-│           └── <module-name>.lua
+│       └── init.lua              # Main setup logic
 ├── modules/                      # Query modules
 │   └── <module-name>/
+│       ├── init.lua              # Module metadata + directives
 │       ├── queries/
 │       │   └── <language>/
 │       │       └── *.scm
@@ -198,7 +185,3 @@ tree-sitter-queries/
 ├── README.md
 └── LICENSE
 ```
-
-## License
-
-MIT

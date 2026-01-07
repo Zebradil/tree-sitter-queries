@@ -1,15 +1,10 @@
 local M = {}
 
-M.setup = function()
-  -- vim.treesitter.query.add_directive("ytt-some-directive!", function(match, _, _, predicate, metadata)
-  --   -- Your directive logic
-  -- end, { force = true })
-  --
-  -- vim.treesitter.query.add_predicate("ytt-some-predicate?", function(match, _, _, predicate)
-  --   -- Your predicate logic
-  --   return true
-  -- end, { force = true })
+-- Module metadata
+M.filetypes = { "yaml" }
 
+M.setup = function()
+  -- Directive to offset first line of a capture's range to the next line, while resetting column to 0
   vim.treesitter.query.add_directive("offset-first-line!", function(match, _, _, pred, metadata)
     local capture_id = pred[2]
     local node = match[capture_id]

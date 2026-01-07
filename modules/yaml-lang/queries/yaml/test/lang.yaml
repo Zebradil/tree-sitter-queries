@@ -6,7 +6,7 @@ sequence:
 singleQuote: # lang:go
   'func main() { fmt.Println("$product version $currentValue") }'
 doubleQuote: # lang:yaml
-  "foo: bar # something"
+  "foo: 'bar' # something"
 
 block: >- # lang:regex
   name: ['"]?(?<product>[^'"\s]+)['"]?\s*
@@ -36,7 +36,7 @@ map:
 umbrellaMap1: # lang:go
   plain: func main() { fmt.Println("$product version $currentValue") }
   singleQuote: 'func main() { fmt.Println("$product version $currentValue") }'
-  doubleQuote: "func main() { fmt.Println(`$product version $currentValue`) }"
+  doubleQuote: "func main() { fmt.Println(`'$product' version $currentValue`) }"
 
 umbrellaMap2: # lang:yaml
   block: |
@@ -45,3 +45,16 @@ umbrellaMap2: # lang:yaml
   block2: |-
     keyA: valueA
     keyB: valueB
+
+umbrellaList1: # lang:bash
+  - echo "$product version $currentValue"
+  - 'echo "$product version $currentValue"'
+  - "echo '$product version $currentValue'"
+
+umbrellaList2: # lang:python
+  - |
+    def greet():
+        print("Hello, World!")
+  - |-
+    def farewell():
+        print("Goodbye, World!")
