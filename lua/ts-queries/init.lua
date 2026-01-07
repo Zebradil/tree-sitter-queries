@@ -88,14 +88,20 @@ M.setup = function(opts)
           load_module(name)
         end
 
-        -- Invalidate query cache to pick up new queries
+        -- Invalidate query cache for this language
+        vim.treesitter.query.invalidate_query(ft, "injections")
+        vim.treesitter.query.invalidate_query(ft, "highlights")
+
+        -- Reattach treesitter to all buffers with this filetype
         for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-          if vim.bo[buf].filetype == ft then
-            -- Reattach treesitter
-            if vim.treesitter.highlighter.active[buf] then
-              vim.treesitter.stop(buf)
-              vim.treesitter.start(buf)
-            end
+          if vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].filetype == ft then
+            local lang = vim.treesitter.language.get_lang(ft) or ft
+
+            -- Stop existing treesitter
+            vim.treesitter.stop(buf)
+
+            -- Restart treesitter
+            pcall(vim.treesitter.start, buf, lang)
           end
         end
       end,

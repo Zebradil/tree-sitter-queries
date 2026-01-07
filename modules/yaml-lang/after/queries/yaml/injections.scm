@@ -1,4 +1,4 @@
-; extends
+;extends
 
 ; Marker before plain scalar
 ;
