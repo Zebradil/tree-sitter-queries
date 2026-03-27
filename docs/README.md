@@ -39,6 +39,32 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 }
 ```
 
+### Nix
+
+**Step 1.** Add the flake input:
+
+```nix
+# flake.nix
+{
+  inputs.tree-sitter-queries.url = "github:zebradil/tree-sitter-queries";
+}
+```
+
+**Step 2.** Apply the overlay:
+
+```nix
+nixpkgs.overlays = [
+  inputs.tree-sitter-queries.overlays.default
+];
+```
+
+**Step 3.** Add the plugin to your Neovim configuration:
+
+```nix
+# Add to extraPlugins
+pkgs.vimPlugins.tree-sitter-queries-nvim
+```
+
 ## Configuration
 
 ### Options
